@@ -25,6 +25,7 @@ namespace local_parentassign;
 
 defined('MOODLE_INTERNAL') || die();
 
+
 class manager {
 
     const PARENT_EMAIL_FIELD = 'parent_email';
