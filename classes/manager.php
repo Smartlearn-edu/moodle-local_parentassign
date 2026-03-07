@@ -122,20 +122,45 @@ class manager
             $lastname = 'User';
         }
 
+        $temppassword = generate_password(12);
+
         $user = new \stdClass();
         $user->auth = 'manual';
         $user->firstname = $firstname;
         $user->lastname = $lastname;
         $user->email = $email;
         $user->username = $email; // Use email as username.
-        $user->password = 'TempPass123!'; // Should be randomized and forced change.
+        $user->password = $temppassword;
         $user->confirmed = 1;
         $user->mnethostid = $CFG->mnet_localhost_id;
         $user->lang = $CFG->lang;
 
         try {
-            $userid = user_create_user($user, false, false);
-            return \core_user::get_user($userid);
+            $userid = user_create_user($user, true, false);
+            $newuser = \core_user::get_user($userid);
+
+            // Force password change on first login.
+            set_user_preference('auth_forcepasswordchange', 1, $newuser);
+
+            // Email the temporary password to the parent.
+            $site = get_site();
+            $supportuser = \core_user::get_support_user();
+
+            $data = new \stdClass();
+            $data->firstname = $newuser->firstname;
+            $data->lastname  = $newuser->lastname;
+            $data->sitename  = format_string($site->fullname);
+            $data->username  = $newuser->username;
+            $data->newpassword = $temppassword;
+            $data->link      = $CFG->wwwroot . '/login/';
+            $data->signoff   = generate_email_signoff();
+
+            $message = get_string('newusernewpasswordtext', '', $data);
+            $subject = get_string('newusernewpasswordsubject', '', format_string($site->fullname));
+
+            email_to_user($newuser, $supportuser, $subject, $message);
+
+            return $newuser;
         } catch (\Exception $e) {
             debugging('Error creating parent user: ' . $e->getMessage());
             return null;
