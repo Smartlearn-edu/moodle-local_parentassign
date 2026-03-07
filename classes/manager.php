@@ -85,6 +85,10 @@ class manager
 
     /**
      * Helper to get profile field value.
+     *
+     * @param int $userid The user ID.
+     * @param string $shortname The profile field shortname.
+     * @return mixed The field value.
      */
     private static function get_profile_field_value($userid, $shortname)
     {
@@ -98,6 +102,10 @@ class manager
 
     /**
      * Creates a new parent user.
+     *
+     * @param string $email The parent email.
+     * @param string $name The parent name.
+     * @return \core_user|\stdClass|null The created user object or null on failure.
      */
     private static function create_parent_user($email, $name)
     {
@@ -136,6 +144,10 @@ class manager
 
     /**
      * Assigns the parent role in the student's context.
+     *
+     * @param int $studentid The student user ID.
+     * @param int $parentid The parent user ID.
+     * @return void
      */
     private static function assign_role($studentid, $parentid)
     {
